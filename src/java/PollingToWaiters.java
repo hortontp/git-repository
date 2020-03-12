@@ -66,6 +66,11 @@ public class PollingToVectors {
         long expirationTime = System.currentTimeMillis() + Duration.ofMinutes(1).toMillis();
         for(Instance instance: terminatedInstances) {
             while(System.currentTimeMillis() < expirationTime && ! instance.getState().getName().equals("terminated")) {
+                log.info("waiting for " + instance.getInstanceId() + " " + instance.getState().getName());
+                cxt.getClock().sleep(1000);
+                instance = ec2.describeInstances(
+                    new DescribeInstancesRequest().withInstanceIds(instance.getInstanceId()))
+                    .getReservations().get(0).getInstances().get(0);
             }
         }
     }
